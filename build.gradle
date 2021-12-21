@@ -1,0 +1,44 @@
+buildscript {
+    ext {
+        kotlin_version = "1.5.0"
+        coroutinesVersion = "1.1.1"
+
+        globalCompileSdkVersion = 30
+        globalBuildToolsVersion = "30.0.0"
+
+        globalMinSdkVersion = 23
+        globalTargetSdkVersion = 30
+
+        def versionMajor = 0
+        def versionMinor = 0
+        def versionPatch = 0
+
+        def versionBuild = 1
+
+        date = new Date().format('yyMMddHHmm')
+
+        globalVersionCode = 1_000_000_000 + 1000 * (10000 * versionMajor + 100 * versionMinor + versionPatch) + versionBuild
+        globalVersionName = "$versionMajor.$versionMinor.$versionPatch-$date"
+
+    }
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:4.2.2"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
