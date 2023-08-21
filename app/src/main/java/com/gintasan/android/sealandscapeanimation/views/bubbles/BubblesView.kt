@@ -10,9 +10,8 @@ import androidx.core.content.res.ResourcesCompat
 import com.gintasan.android.sealandscapeanimation.R
 
 class BubblesView(
-    context: Context,
-    attrs: AttributeSet,
-) : AppCompatImageView(context, attrs) {
+    context: Context
+) : AppCompatImageView(context) {
     private val bubblesDrawable = ResourcesCompat.getDrawable(resources, R.drawable.bubbles_anim, null)
 
     var bubblesHeight = 10
@@ -26,9 +25,8 @@ class BubblesView(
 
     constructor(
         context: Context,
-        attrs: AttributeSet,
         bubblesHeight: Int,
-    ) : this(context, attrs) {
+    ) : this(context) {
         this.bubblesHeight = bubblesHeight
     }
 

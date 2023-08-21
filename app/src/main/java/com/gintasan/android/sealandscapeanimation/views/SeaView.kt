@@ -3,7 +3,6 @@ package com.gintasan.android.sealandscapeanimation.views
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.widget.FrameLayout
 import android.widget.RelativeLayout
@@ -18,9 +17,12 @@ import com.gintasan.android.sealandscapeanimation.model.Cords
 import java.util.LinkedList
 import java.util.Queue
 
-class SeaView(context: Context, private val attrs: AttributeSet) : FrameLayout(context, attrs) {
-    private lateinit var seaDrawable: SeaDrawable
-    private var bubblesHeight = 10
+class SeaView(
+    context: Context,
+    attrs: AttributeSet
+) : FrameLayout(context, attrs) {
+    private val seaDrawable = SeaDrawable(context.resources)
+    private val bubblesHeight = 10
     private var floatWidth = 120
     private var maxDolphinHeight = 350
 
@@ -29,7 +31,7 @@ class SeaView(context: Context, private val attrs: AttributeSet) : FrameLayout(c
 
     private val dolphinView = DolphinView(context, attrs)
     private val floatView = FloatView(context, attrs, floatWidth)
-    private val bubbles: BubblesView get() = BubblesView(context, attrs, bubblesHeight)
+    private val bubbles: BubblesView get() = BubblesView(context, bubblesHeight)
 
     private var isFloatDrew = false
     private var floatDirection = false
@@ -47,46 +49,8 @@ class SeaView(context: Context, private val attrs: AttributeSet) : FrameLayout(c
 
     private val cordsQueue: Queue<Cords> = LinkedList()
 
-    constructor(
-        context: Context,
-        attrs: AttributeSet,
-        seaColor: Int,
-        seaHeight: Float,
-        seaPlanesCount: Int,
-        sunColor: Int,
-        moonColor: Int,
-        starsColor: Int,
-        starsCount: Int,
-        starSize: Float,
-        sunSize: Float,
-        moonSize: Float,
-        maxActionStarSize: Float,
-        bubblesHeight: Int,
-        floatWidth: Int,
-        maxDolphinHeight: Int,
-    ) : this(context, attrs) {
-        seaDrawable = SeaDrawable(
-            resources,
-            seaColor,
-            seaHeight,
-            seaPlanesCount,
-            sunColor,
-            moonColor,
-            starsColor,
-            starsCount,
-            starSize,
-            sunSize,
-            moonSize,
-            maxActionStarSize
-        )
-        this.bubblesHeight = bubblesHeight
-        this.floatWidth = floatWidth
-        this.maxDolphinHeight = maxDolphinHeight
-    }
-
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        seaDrawable = SeaDrawable(resources)
         background = seaDrawable
     }
 
@@ -96,21 +60,24 @@ class SeaView(context: Context, private val attrs: AttributeSet) : FrameLayout(c
         layoutWidth = width
 
         if (!isFloatDrew) {
-            val floatCurrentTop = ((height - seaDrawable.seaHeight) + seaDrawable.seaHeight * 0.2).toInt()
+            val floatCurrentTop =
+                ((height - seaDrawable.seaHeight) + seaDrawable.seaHeight * 0.2).toInt()
             val floatCurrentStart = width / 4
 
             floatView.apply {
-                val heightRange = (layoutHeight - floatView.floatHeight) - (seaDrawable.seaHeight - floatView.floatHeight * 0.8) // TODO
+                val heightRange =
+                    (layoutHeight - floatView.floatHeight) - (seaDrawable.seaHeight - floatView.floatHeight * 0.8) // TODO
                 val position = floatCurrentTop - seaDrawable.seaHeight
                 var percent = position * 100 / heightRange / 100
                 if (percent <= 0.7) {
                     percent = 0.7
                 }
                 floatWidth = (defaultFloatWidth * percent).toInt()
-                RelativeLayout.LayoutParams(floatView.floatWidth, floatView.floatHeight.toInt()).let {
-                    it.setMargins(floatCurrentStart, floatCurrentTop, 0, 0)
-                    this.layoutParams = it
-                }
+                RelativeLayout.LayoutParams(floatView.floatWidth, floatView.floatHeight.toInt())
+                    .let {
+                        it.setMargins(floatCurrentStart, floatCurrentTop, 0, 0)
+                        this.layoutParams = it
+                    }
             }
 
             showFloat()
@@ -121,7 +88,7 @@ class SeaView(context: Context, private val attrs: AttributeSet) : FrameLayout(c
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        val stars = seaDrawable.getStarsItem() ?: return false
+        val stars = seaDrawable.getStarsItem()
         val wave = seaDrawable.getWaveItem()
         val currentEvent = event ?: return false
 
@@ -142,6 +109,7 @@ class SeaView(context: Context, private val attrs: AttributeSet) : FrameLayout(c
                     return true
                 }
             }
+
             MotionEvent.ACTION_MOVE -> {
                 if (floatView.isFloatTouched) {
                     prevCords?.let {
@@ -149,7 +117,8 @@ class SeaView(context: Context, private val attrs: AttributeSet) : FrameLayout(c
                         val yDiff = (it.y - (floatView.startCords?.y ?: 0f)).toInt()
 
                         floatView.apply {
-                            val heightRange = (layoutHeight - floatView.floatHeight) - (seaDrawable.seaHeight - floatView.floatHeight * 0.8) // TODO
+                            val heightRange =
+                                (layoutHeight - floatView.floatHeight) - (seaDrawable.seaHeight - floatView.floatHeight * 0.8) // TODO
                             if (currentEvent.y < layoutHeight - floatView.floatHeight * 0.1
                                 && currentEvent.y > seaDrawable.seaHeight
                             ) {
@@ -170,7 +139,10 @@ class SeaView(context: Context, private val attrs: AttributeSet) : FrameLayout(c
                             checkDirection(it.x, currentEvent.x)
                             startBubbles()
                             floatView.apply {
-                                LayoutParams(floatView.floatWidth, floatView.floatHeight.toInt()).let { params ->
+                                LayoutParams(
+                                    floatView.floatWidth,
+                                    floatView.floatHeight.toInt()
+                                ).let { params ->
                                     params.setMargins(xDiff, yDiff, 0, 0)
                                     this.layoutParams = params
                                 }
@@ -181,20 +153,46 @@ class SeaView(context: Context, private val attrs: AttributeSet) : FrameLayout(c
                                 if (xDiff < floatView.width * 0.1f) {
                                     when {
                                         yDiff < seaDrawable.seaHeight - floatView.floatHeight * 0.5 -> {
-                                            LayoutParams(floatView.floatWidth, floatView.floatHeight.toInt()).let { params ->
-                                                params.setMargins((floatView.width * 0.1f).toInt(), (seaDrawable.seaHeight - floatView.floatHeight * 0.5).toInt(), 0, 0)
+                                            LayoutParams(
+                                                floatView.floatWidth,
+                                                floatView.floatHeight.toInt()
+                                            ).let { params ->
+                                                params.setMargins(
+                                                    (floatView.width * 0.1f).toInt(),
+                                                    (seaDrawable.seaHeight - floatView.floatHeight * 0.5).toInt(),
+                                                    0,
+                                                    0
+                                                )
                                                 this.layoutParams = params
                                             }
                                         }
+
                                         yDiff > layoutHeight - floatView.height -> {
-                                            LayoutParams(floatView.floatWidth, floatView.floatHeight.toInt()).let { params ->
-                                                params.setMargins((floatView.width * 0.1f).toInt(), layoutHeight - floatView.height, 0, 0)
+                                            LayoutParams(
+                                                floatView.floatWidth,
+                                                floatView.floatHeight.toInt()
+                                            ).let { params ->
+                                                params.setMargins(
+                                                    (floatView.width * 0.1f).toInt(),
+                                                    layoutHeight - floatView.height,
+                                                    0,
+                                                    0
+                                                )
                                                 this.layoutParams = params
                                             }
                                         }
+
                                         else -> {
-                                            LayoutParams(floatView.floatWidth, floatView.floatHeight.toInt()).let { params ->
-                                                params.setMargins((floatView.width * 0.1f).toInt(), yDiff, 0, 0)
+                                            LayoutParams(
+                                                floatView.floatWidth,
+                                                floatView.floatHeight.toInt()
+                                            ).let { params ->
+                                                params.setMargins(
+                                                    (floatView.width * 0.1f).toInt(),
+                                                    yDiff,
+                                                    0,
+                                                    0
+                                                )
                                                 this.layoutParams = params
                                             }
                                         }
@@ -206,20 +204,46 @@ class SeaView(context: Context, private val attrs: AttributeSet) : FrameLayout(c
                                 if (xDiff > layoutWidth - floatView.width) {
                                     when {
                                         yDiff < seaDrawable.seaHeight - floatView.floatHeight * 0.5 -> {
-                                            LayoutParams(floatView.floatWidth, floatView.floatHeight.toInt()).let { params ->
-                                                params.setMargins((layoutWidth - floatView.width), (seaDrawable.seaHeight - floatView.floatHeight * 0.5).toInt(), 0, 0)
+                                            LayoutParams(
+                                                floatView.floatWidth,
+                                                floatView.floatHeight.toInt()
+                                            ).let { params ->
+                                                params.setMargins(
+                                                    (layoutWidth - floatView.width),
+                                                    (seaDrawable.seaHeight - floatView.floatHeight * 0.5).toInt(),
+                                                    0,
+                                                    0
+                                                )
                                                 this.layoutParams = params
                                             }
                                         }
+
                                         yDiff > layoutHeight - floatView.height -> {
-                                            LayoutParams(floatView.floatWidth, floatView.floatHeight.toInt()).let { params ->
-                                                params.setMargins((layoutWidth - floatView.width), layoutHeight - floatView.height, 0, 0)
+                                            LayoutParams(
+                                                floatView.floatWidth,
+                                                floatView.floatHeight.toInt()
+                                            ).let { params ->
+                                                params.setMargins(
+                                                    (layoutWidth - floatView.width),
+                                                    layoutHeight - floatView.height,
+                                                    0,
+                                                    0
+                                                )
                                                 this.layoutParams = params
                                             }
                                         }
+
                                         else -> {
-                                            LayoutParams(floatView.floatWidth, floatView.floatHeight.toInt()).let { params ->
-                                                params.setMargins((layoutWidth - floatView.width), yDiff, 0, 0)
+                                            LayoutParams(
+                                                floatView.floatWidth,
+                                                floatView.floatHeight.toInt()
+                                            ).let { params ->
+                                                params.setMargins(
+                                                    (layoutWidth - floatView.width),
+                                                    yDiff,
+                                                    0,
+                                                    0
+                                                )
                                                 this.layoutParams = params
                                             }
                                         }
@@ -231,20 +255,46 @@ class SeaView(context: Context, private val attrs: AttributeSet) : FrameLayout(c
                                 if (yDiff > layoutHeight - floatView.height) {
                                     when {
                                         xDiff < floatView.width * 0.1f -> {
-                                            LayoutParams(floatView.floatWidth, floatView.floatHeight.toInt()).let { params ->
-                                                params.setMargins((floatView.width * 0.1f).toInt(), layoutHeight - floatView.height, 0, 0)
+                                            LayoutParams(
+                                                floatView.floatWidth,
+                                                floatView.floatHeight.toInt()
+                                            ).let { params ->
+                                                params.setMargins(
+                                                    (floatView.width * 0.1f).toInt(),
+                                                    layoutHeight - floatView.height,
+                                                    0,
+                                                    0
+                                                )
                                                 this.layoutParams = params
                                             }
                                         }
+
                                         xDiff > layoutWidth - floatView.width -> {
-                                            LayoutParams(floatView.floatWidth, floatView.floatHeight.toInt()).let { params ->
-                                                params.setMargins(layoutWidth - floatView.width, layoutHeight - floatView.height, 0, 0)
+                                            LayoutParams(
+                                                floatView.floatWidth,
+                                                floatView.floatHeight.toInt()
+                                            ).let { params ->
+                                                params.setMargins(
+                                                    layoutWidth - floatView.width,
+                                                    layoutHeight - floatView.height,
+                                                    0,
+                                                    0
+                                                )
                                                 this.layoutParams = params
                                             }
                                         }
+
                                         else -> {
-                                            LayoutParams(floatView.floatWidth, floatView.floatHeight.toInt()).let { params ->
-                                                params.setMargins(xDiff, layoutHeight - floatView.height, 0, 0)
+                                            LayoutParams(
+                                                floatView.floatWidth,
+                                                floatView.floatHeight.toInt()
+                                            ).let { params ->
+                                                params.setMargins(
+                                                    xDiff,
+                                                    layoutHeight - floatView.height,
+                                                    0,
+                                                    0
+                                                )
                                                 this.layoutParams = params
                                             }
                                         }
@@ -255,8 +305,16 @@ class SeaView(context: Context, private val attrs: AttributeSet) : FrameLayout(c
                                 }
 
                                 if (yDiff < seaDrawable.seaHeight - floatView.floatHeight * 0.5) {
-                                    LayoutParams(floatView.floatWidth, floatView.floatHeight.toInt()).let { params ->
-                                        params.setMargins(xDiff, (seaDrawable.seaHeight - floatView.floatHeight * 0.5).toInt(), 0, 0)
+                                    LayoutParams(
+                                        floatView.floatWidth,
+                                        floatView.floatHeight.toInt()
+                                    ).let { params ->
+                                        params.setMargins(
+                                            xDiff,
+                                            (seaDrawable.seaHeight - floatView.floatHeight * 0.5).toInt(),
+                                            0,
+                                            0
+                                        )
                                         this.layoutParams = params
                                     }
                                     checkDirection(it.x, currentEvent.x)
@@ -271,6 +329,7 @@ class SeaView(context: Context, private val attrs: AttributeSet) : FrameLayout(c
                     return true
                 }
             }
+
             MotionEvent.ACTION_DOWN -> {
                 if (floatView.isFloatTouched) {
                     return true
@@ -283,7 +342,8 @@ class SeaView(context: Context, private val attrs: AttributeSet) : FrameLayout(c
                 if (currentEvent.y > (layoutHeight - wave.height) * 1.4f) {
                     seaDrawable.startDolphin { isGoes ->
                         if (isGoes) {
-                            var percent = ((currentEvent.y - seaDrawable.seaHeight) * 100) / (layoutHeight - seaDrawable.seaHeight) / 100
+                            var percent =
+                                ((currentEvent.y - seaDrawable.seaHeight) * 100) / (layoutHeight - seaDrawable.seaHeight) / 100
                             if (percent < 0.5) {
                                 percent = 0.5f
                             }
@@ -328,7 +388,12 @@ class SeaView(context: Context, private val attrs: AttributeSet) : FrameLayout(c
             if (floatDirection) {
                 newBubbles.apply {
                     LayoutParams(bubblesWidth.toInt(), bubblesHeight).let { params ->
-                        params.setMargins((floatView.marginLeft + floatView.floatWidth * 0.2).toInt(), (floatView.marginTop + floatView.floatHeight.toInt() * 0.95f).toInt(), 0, 0)
+                        params.setMargins(
+                            (floatView.marginLeft + floatView.floatWidth * 0.2).toInt(),
+                            (floatView.marginTop + floatView.floatHeight.toInt() * 0.95f).toInt(),
+                            0,
+                            0
+                        )
                         this.layoutParams = params
                     }
                     onBubblesListener = {
@@ -339,7 +404,12 @@ class SeaView(context: Context, private val attrs: AttributeSet) : FrameLayout(c
             } else {
                 newBubbles.apply {
                     LayoutParams(bubblesWidth.toInt(), bubblesHeight).let { params ->
-                        params.setMargins((floatView.marginLeft + floatView.floatWidth * 0.8).toInt(), (floatView.marginTop + floatView.floatHeight.toInt() * 0.95f).toInt(), 0, 0)
+                        params.setMargins(
+                            (floatView.marginLeft + floatView.floatWidth * 0.8).toInt(),
+                            (floatView.marginTop + floatView.floatHeight.toInt() * 0.95f).toInt(),
+                            0,
+                            0
+                        )
                         this.layoutParams = params
                     }
                     onBubblesListener = {

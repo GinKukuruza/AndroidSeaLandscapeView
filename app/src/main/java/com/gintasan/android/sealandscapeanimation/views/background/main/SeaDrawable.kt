@@ -9,6 +9,7 @@ import android.graphics.Paint
 import android.graphics.PixelFormat
 import android.graphics.Shader
 import android.graphics.drawable.Drawable
+import androidx.core.content.res.ResourcesCompat
 import com.gintasan.android.sealandscapeanimation.model.Item
 import com.gintasan.android.sealandscapeanimation.model.RGB
 import com.gintasan.android.sealandscapeanimation.utils.ColorChanger
@@ -29,15 +30,24 @@ class SeaDrawable(
     private val seaColor: Int = resources.getColor(R.color.seaColor),
     val seaHeight: Float = resources.getDimension(R.dimen.seaHeight),
     private val seaPlanesCount: Int = 8,
-    private val sunColor: Int = resources.getColor(R.color.sunColor),
-    private val moonColor: Int = resources.getColor(R.color.moonColor),
-    private val starsColor: Int = resources.getColor(R.color.starColor),
+    private val sunColor: Int = ResourcesCompat.getColor(resources, R.color.sunColor, null),
+    private val moonColor: Int = ResourcesCompat.getColor(resources, R.color.moonColor, null),
+    private val starsColor: Int = ResourcesCompat.getColor(resources, R.color.starColor, null),
     private val starsCount: Int = 30,
     private val starSize: Float = 5f,
     private val sunSize: Float = 45f,
     private val moonSize: Float = 30f,
     private val maxActionStarSize: Float = 50f,
 ) : Drawable() {
+
+    /**
+     * Sea elements
+     */
+    private lateinit var sun: Sun
+    private lateinit var moon: Moon
+    private lateinit var stars: Stars
+    private var actionStar: ActionStar? = null
+
     private var dayTimer: Job? = null
     private var actionStarTimer: Job? = null
     private var dolphinTimer: Job? = null
@@ -48,11 +58,11 @@ class SeaDrawable(
     private val argbEvaluator = ArgbEvaluator()
     private var waves = ArrayList<Sea>()
 
-    private var sun: Sun? = null
-    private var moon: Moon? = null
-    private var stars: Stars? = null
-    private var actionStar: ActionStar? = null
-
+    /**
+     * Dynamic generation of the colors of the main screen
+     * This should be dynamically because the color of each element below
+     * depends of certain time of day/night lifecycle
+     */
     private val fogDayColor: Int get() = fogDayColorChanger.getColor(currentTime)
     private val fogNightColor: Int get() = fogNightColorChanger.getColor(currentTime - SUN_TIME)
     private val skyDayColor: Int get() = skyDayColorChanger.getColor(currentTime)
@@ -117,7 +127,7 @@ class SeaDrawable(
         drawWaves(canvas)
         drawStars(canvas)
         drawActionStar(canvas)
-        drawSunAndMoon(canvas)
+        drawSunOrMoon(canvas)
 
         if (isVisible) {
             Thread.sleep(sleeperTime)
@@ -129,7 +139,7 @@ class SeaDrawable(
     override fun setColorFilter(colorFilter: ColorFilter?) {}
     override fun getOpacity() = PixelFormat.OPAQUE
 
-    fun getStarsItem(): Item? {
+    fun getStarsItem(): Item {
         return stars
     }
 
@@ -168,7 +178,7 @@ class SeaDrawable(
 
     private fun drawStars(canvas: Canvas) {
         if (currentTime > SUN_TIME) {
-            stars?.draw(currentTime - SUN_TIME, canvas)
+            stars.draw(currentTime - SUN_TIME, canvas)
         }
     }
 
@@ -189,11 +199,11 @@ class SeaDrawable(
         }
     }
 
-    private fun drawSunAndMoon(canvas: Canvas) {
+    private fun drawSunOrMoon(canvas: Canvas) {
         if (currentTime > SUN_TIME) {
-            moon?.draw((currentTime - SUN_TIME), canvas)
+            moon.draw((currentTime - SUN_TIME), canvas)
         } else {
-            sun?.draw(currentTime, canvas)
+            sun.draw(currentTime, canvas)
         }
     }
 
