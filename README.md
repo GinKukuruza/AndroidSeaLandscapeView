@@ -31,3 +31,8 @@
 ![Float move](https://github.com/GinKukuruza/AndroidSeaLandscapeView/blob/master/app/src/main/res/raw/float_move.png)
 
 ![Float distance](https://github.com/GinKukuruza/AndroidSeaLandscapeView/blob/master/app/src/main/res/raw/float_distance.png)
+
+
+Video experience:
+
+https://github.com/GinKukuruza/AndroidSeaLandscapeView/assets/49131970/0addc1c0-50f0-459c-9007-ef902f3b25b1
