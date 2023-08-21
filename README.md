@@ -2,7 +2,7 @@
 
 :white_check_mark: AndroidSeaLandscapeView project, for informational purposes only, its a custom view with different possibilities
 
-## IMPORTANT: I didn't try to build a good project arhitecture, this project was make to show what complex and beautiful things i can craete using native java api
+## IMPORTANT: I didn't try to build a good project arhitecture, this project was make to show what complex and beautiful can be created using native java api
 
 ## FUNCTIONALITY:
 
